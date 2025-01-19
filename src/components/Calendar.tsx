@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Calendar as BigCalendar,
   dateFnsLocalizer,
   Event,
+  View,
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -31,7 +32,8 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "../components/ui/alert-dialog";
-
+import { EventTooltip } from "../components/ui/animated-tooltip";
+import "../styles/calender.css";
 const DnDCalendar = withDragAndDrop(BigCalendar);
 
 interface CalendarEvent extends Event {
@@ -82,7 +84,8 @@ export function Calendar() {
     end: Date;
     changeType: "date" | "time" | "both";
   } | null>(null);
-
+  const [defaultView, setDefaultView] = useState<View>("week");
+  const [isMobile, setIsMobile] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{
     start: Date;
@@ -111,6 +114,18 @@ export function Calendar() {
     setSelectedSlot(slotInfo);
     setShowScheduleDialog(true);
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setDefaultView(mobile ? "day" : "week");
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const interviews = useInterviewStore((state) => state.interviews);
   const updateInterview = useInterviewStore((state) => state.updateInterview);
@@ -280,60 +295,99 @@ export function Calendar() {
     };
   };
 
+  const CustomToolbar = (toolbar: any) => {
+    const currentInterviews = events.filter((event) => {
+      const eventDate = event.start;
+      const today = new Date();
+      return (
+        eventDate &&
+        eventDate.getDate() === today.getDate() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getFullYear() === today.getFullYear()
+      );
+    });
+
+    const tooltipItems = currentInterviews.map((event) => ({
+      title: event.interview.candidateName,
+      interviewer: event.interview.interviewerName,
+      candidate: event.interview.candidateName,
+      time: event.start as Date,
+      type: event.interview.type,
+    }));
+
+    return (
+      <div className="rbc-toolbar">
+        <span className="rbc-btn-group">
+          <button onClick={() => toolbar.onNavigate("PREV")}>←</button>
+          <button onClick={() => toolbar.onNavigate("TODAY")}>Today</button>
+          <button onClick={() => toolbar.onNavigate("NEXT")}>→</button>
+        </span>
+
+        <span className="rbc-toolbar-label flex items-center justify-center gap-4">
+          {toolbar.label}
+          {tooltipItems.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Today's Interviews:</span>
+              <EventTooltip items={tooltipItems} />
+            </div>
+          )}
+        </span>
+
+        <span className="rbc-btn-group">
+          {!isMobile && (
+            <button onClick={() => toolbar.onView("month")}>Month</button>
+          )}
+          <button onClick={() => toolbar.onView("week")}>Week</button>
+          <button onClick={() => toolbar.onView("day")}>Day</button>
+        </span>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className="h-screen bg-white p-4 rounded-lg shadow-md relative">
+      <div className="min-h-screen h-[calc(100vh-4rem)] md:h-screen bg-white p-2 md:p-4 rounded-lg shadow-md relative overflow-hidden">
         {isLoading && (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-50">
             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
           </div>
         )}
-        <div className="mb-4 flex gap-4">
+
+        {/* Legend - Responsive grid for type colors */}
+        <div className="mb-2 md:mb-4 grid grid-cols-2 md:flex md:flex-row gap-2 md:gap-4 p-2">
           {Object.entries(typeColors).map(([type, color]) => (
-            <div key={type} className="flex items-center gap-2">
+            <div
+              key={type}
+              className="flex items-center gap-2 text-xs md:text-sm"
+            >
               <div
-                className="w-4 h-4 rounded-full"
+                className="w-3 h-3 md:w-4 md:h-4 rounded-full"
                 style={{ backgroundColor: color }}
               />
-              <span className="text-sm">{type}</span>
+              <span>{type}</span>
             </div>
           ))}
         </div>
-        <div className="p-4 h-full">
+
+        {/* Calendar Container */}
+        <div className="h-[calc(100%-3rem)] md:h-[calc(100%-4rem)] p-1 md:p-4 overflow-hidden">
           <DnDCalendar
             localizer={localizer}
             events={events}
-            defaultView="week"
-            views={["month", "week", "day"]}
+            defaultView={defaultView}
+            views={isMobile ? ["day", "week"] : ["month", "week", "day"]}
             step={60}
             timeslots={1}
             showMultiDayTimes
-            onEventDrop={(args: any) => onEventChange(args)}
-            onEventResize={(resizeInfo: any) => onEventChange(resizeInfo)}
+            onEventDrop={onEventChange}
+            onEventResize={onEventChange}
             selectable
             resizable
             popup
-            className="rounded-lg"
+            className="responsive-calendar"
             eventPropGetter={eventStyleGetter}
-            tooltipAccessor={(event: object) => {
-              const calendarEvent = event as CalendarEvent;
-              return `
-                ${calendarEvent.interview.candidateName}
-                Type: ${calendarEvent.interview.type}
-                Interviewer: ${calendarEvent.interview.interviewerName}
-                Date: ${
-                  calendarEvent.start
-                    ? format(calendarEvent.start, "MMM dd, yyyy")
-                    : "N/A"
-                }
-                Time: ${
-                  calendarEvent.start
-                    ? format(calendarEvent.start, "HH:mm")
-                    : "N/A"
-                }
-              `;
-            }}
             onSelectSlot={handleSelectSlot}
+            components={{ toolbar: CustomToolbar }}
           />
         </div>
       </div>
@@ -341,7 +395,7 @@ export function Calendar() {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Update</AlertDialogTitle>
+            <AlertDialogTitle className="text-black" >Confirm Update</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to update the{" "}
               {pendingChange?.changeType === "both"
@@ -353,7 +407,7 @@ export function Calendar() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="text-black" disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               disabled={isLoading}
               onClick={handleConfirmReschedule}
@@ -373,7 +427,7 @@ export function Calendar() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Schedule New Interview</AlertDialogTitle>
+            <AlertDialogTitle className="text-black">Schedule New Interview</AlertDialogTitle>
             <AlertDialogDescription>
               Would you like to schedule an interview for{" "}
               {selectedSlot?.start &&
@@ -382,7 +436,10 @@ export function Calendar() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowScheduleDialog(false)}>
+            <AlertDialogCancel
+              className="text-black "
+              onClick={() => setShowScheduleDialog(false)}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
