@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Clock, User, Users, Tag } from "lucide-react";
 import { Interview, InterviewType } from "../types";
 import { useInterviewStore } from "../store/interviewStore";
+import { toast } from "react-hot-toast";
 interface InterviewFormProps {
   initialData?: Interview;
   isEditing?: boolean;
@@ -43,8 +44,10 @@ export function InterviewForm({
 
     if (isEditing) {
       updateInterview(interview.id, interview);
+      toast.success("Interview updated successfully!");
     } else {
       addInterview(interview);
+      toast.success("Interview scheduled successfully!");
     }
 
     navigate("/");

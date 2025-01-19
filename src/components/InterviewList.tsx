@@ -5,6 +5,7 @@ import { Edit2, Trash2, Calendar, Search } from "lucide-react";
 import { useInterviewStore } from "../store/interviewStore";
 import { Interview } from "../types";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
 const listVariants = {
   initial: {
@@ -62,6 +63,7 @@ export function InterviewList() {
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this interview?")) {
       deleteInterview(id);
+      toast.success("Interview deleted successfully!");
     }
   };
 
