@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { parse, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { Edit2, Trash2, Calendar } from "lucide-react";
+import { Edit2, Trash2, Calendar, Search } from "lucide-react";
 import { useInterviewStore } from "../store/interviewStore";
 import { Interview } from "../types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,17 +58,37 @@ export function InterviewList() {
   const navigate = useNavigate();
   const interviews = useInterviewStore((state) => state.interviews);
   const deleteInterview = useInterviewStore((state) => state.deleteInterview);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this interview?")) {
       deleteInterview(id);
     }
   };
 
+  const filteredInterviews = interviews.filter((interview) => {
+    const searchLower = searchTerm.toLowerCase();
+    const dateStr = format(new Date(interview.date), "PPpp").toLowerCase();
+
+    return (
+      interview.candidateName.toLowerCase().includes(searchLower) ||
+      interview.interviewerName.toLowerCase().includes(searchLower) ||
+      dateStr.includes(searchLower)
+    );
+  });
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900">Scheduled Interviews</h2>
-
+      <div className="relative w-full">
+        <Search className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search by Name or Date..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-8 w-full py-2 focus:border-none block sm:text-sm border-gray-300 rounded-md border-2"
+        />
+      </div>
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <AnimatePresence>
           <motion.ul
@@ -76,7 +97,7 @@ export function InterviewList() {
             animate="animate"
             className="divide-y divide-gray-200"
           >
-            {interviews.map((interview) => (
+            {filteredInterviews.map((interview) => (
               <motion.li
                 variants={itemVariants}
                 initial="initial"
@@ -138,9 +159,11 @@ export function InterviewList() {
                 </div>
               </motion.li>
             ))}
-            {interviews.length === 0 && (
+            {filteredInterviews.length === 0 && (
               <li className="px-4 py-8 text-center text-gray-500">
-                No interviews scheduled yet.
+                {interviews.length === 0
+                  ? "No interviews scheduled yet."
+                  : "No interviews match your search."}
               </li>
             )}
           </motion.ul>
