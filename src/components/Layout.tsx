@@ -29,7 +29,7 @@ export function Layout() {
           </div>
         </div>
       </nav>
-      <main className="max-w-7xl pt-[75px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl pt-[90px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
     </div>

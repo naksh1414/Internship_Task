@@ -12,7 +12,7 @@ A React/Vite application for managing and scheduling interviews, built with Type
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/naksh1414/Internship_Task.git
 cd naksh1414-internship_task
 ```
 
@@ -70,15 +70,6 @@ naksh1414-internship_task/
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build locally
-
-## Environment Variables
-
-Create a `.env` file in the root directory and add any required environment variables:
-
-```env
-VITE_API_URL=your_api_url_here
-# Add other environment variables as needed
-```
 
 ## Contributing
 

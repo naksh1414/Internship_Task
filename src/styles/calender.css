@@ -1,0 +1,108 @@
+/* Calendar.css */
+.responsive-calendar {
+    /* General responsive styles */
+    font-size: 14px;
+  }
+  
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    .responsive-calendar {
+      font-size: 12px;
+    }
+  
+    .responsive-calendar .rbc-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0.5rem;
+    }
+  
+    .responsive-calendar .rbc-toolbar-label {
+      padding: 0.5rem 0;
+      text-align: center;
+    }
+  
+    .responsive-calendar .rbc-btn-group {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+  
+    .responsive-calendar .rbc-btn-group button {
+      padding: 0.5rem;
+    }
+  
+    .responsive-calendar .rbc-event {
+      padding: 2px;
+    }
+  
+    .responsive-calendar .rbc-event-content {
+      font-size: 11px;
+      line-height: 1.2;
+    }
+  
+    .responsive-calendar .rbc-time-content {
+      font-size: 11px;
+    }
+  
+    .responsive-calendar .rbc-time-header-content {
+      font-size: 11px;
+    }
+  
+    .responsive-calendar .rbc-time-view {
+      min-height: calc(100vh - 12rem);
+    }
+  }
+  
+  /* Tablet styles */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .responsive-calendar .rbc-toolbar {
+      padding: 0.75rem;
+    }
+  
+    .responsive-calendar .rbc-time-view {
+      min-height: calc(100vh - 14rem);
+    }
+  }
+  
+  /* General styles */
+  .responsive-calendar .rbc-calendar {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .responsive-calendar .rbc-event {
+    border-radius: 4px;
+  }
+  
+  .responsive-calendar .rbc-time-view,
+  .responsive-calendar .rbc-month-view {
+    background: white;
+    border-radius: 8px;
+  }
+  
+  .responsive-calendar .rbc-header {
+    padding: 8px;
+    font-weight: 500;
+  }
+  
+  .responsive-calendar .rbc-toolbar button {
+    color: #374151;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .responsive-calendar .rbc-toolbar button:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .responsive-calendar .rbc-toolbar button.rbc-active {
+    background-color: #e5e7eb;
+  }
+  
+  .responsive-calendar .rbc-event {
+    transition: opacity 0.2s ease;
+  }
+  
+  .responsive-calendar .rbc-event:hover {
+    opacity: 0.9;
+  }
