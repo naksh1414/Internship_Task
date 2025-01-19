@@ -1,6 +1,8 @@
 # Interview Scheduling Application
 
 A React/Vite application for managing and scheduling interviews, built with TypeScript and Tailwind CSS.
+
+
 Check out the Live Demo at - https://internshiptask-production.up.railway.app/
 
 ## Prerequisites
