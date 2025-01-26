@@ -32,13 +32,13 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "../components/ui/alert-dialog";
-import { EventTooltip } from "../components/ui/animated-tooltip";
+// import { EventTooltip } from "../components/ui/animated-tooltip";
 import "../styles/calender.css";
 const DnDCalendar = withDragAndDrop(BigCalendar);
 
 interface CalendarEvent extends Event {
   id: string;
-  interview: Interview;
+  interview: Interview & { changeType?: "date" | "time" | "both" };
 }
 
 interface EventInteractionArgs<T> {
@@ -237,13 +237,15 @@ export function Calendar() {
         updatedTime,
       });
 
-      const updatedInterview: Interview = {
+      const updatedInterview: Interview & {changeType:"date"|"time"|"both"} = {
         ...currentInterview,
         date: updatedDate,
         time: updatedTime,
+        changeType,
       };
 
       updateInterview(currentInterview.id, updatedInterview);
+      console.log("Interview updated:", updatedInterview);
 
       const changeTypeText = {
         date: "date",
@@ -295,73 +297,73 @@ export function Calendar() {
     };
   };
 
-  const CustomToolbar = (toolbar: any) => {
-    const currentInterviews = events.filter((event) => {
-      const eventDate = event.start;
-      const today = new Date();
-      return (
-        eventDate &&
-        eventDate.getDate() === today.getDate() &&
-        eventDate.getMonth() === today.getMonth() &&
-        eventDate.getFullYear() === today.getFullYear()
-      );
-    });
+  // const CustomToolbar = (toolbar: any) => {
+  //   const currentInterviews = events.filter((event) => {
+  //     const eventDate = event.start;
+  //     const today = new Date();
+  //     return (
+  //       eventDate &&
+  //       eventDate.getDate() === today.getDate() &&
+  //       eventDate.getMonth() === today.getMonth() &&
+  //       eventDate.getFullYear() === today.getFullYear()
+  //     );
+  //   });
 
-    const tooltipItems = currentInterviews.map((event) => ({
-      title: event.interview.candidateName,
-      interviewer: event.interview.interviewerName,
-      candidate: event.interview.candidateName,
-      time: event.start as Date,
-      type: event.interview.type,
-    }));
+  //   const tooltipItems = currentInterviews.map((event) => ({
+  //     title: event.interview.candidateName,
+  //     interviewer: event.interview.interviewerName,
+  //     candidate: event.interview.candidateName,
+  //     time: event.start as Date,
+  //     type: event.interview.type,
+  //   }));
 
-    return (
-      <div className="rbc-toolbar">
-        <span className="rbc-btn-group">
-          <button onClick={() => toolbar.onNavigate("PREV")}>←</button>
-          <button onClick={() => toolbar.onNavigate("TODAY")}>Today</button>
-          <button onClick={() => toolbar.onNavigate("NEXT")}>→</button>
-        </span>
+  //   return (
+  //     <div className="rbc-toolbar">
+  //       <span className="rbc-btn-group">
+  //         <button onClick={() => toolbar.onNavigate("PREV")}>←</button>
+  //         <button onClick={() => toolbar.onNavigate("TODAY")}>Today</button>
+  //         <button onClick={() => toolbar.onNavigate("NEXT")}>→</button>
+  //       </span>
 
-        <span className="rbc-toolbar-label flex items-center justify-center gap-4">
-          {toolbar.label}
-          {tooltipItems.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Today's Interviews:</span>
-              <EventTooltip items={tooltipItems} />
-            </div>
-          )}
-        </span>
+  //       <span className="flex items-center justify-center gap-4 rbc-toolbar-label">
+  //         {toolbar.label}
+  //         {tooltipItems.length > 0 && (
+  //           <div className="flex items-center gap-2">
+  //             <span className="text-sm text-gray-500">Today's Interviews:</span>
+  //             <EventTooltip items={tooltipItems} />
+  //           </div>
+  //         )}
+  //       </span>
 
-        <span className="rbc-btn-group">
-          {!isMobile && (
-            <button onClick={() => toolbar.onView("month")}>Month</button>
-          )}
-          <button onClick={() => toolbar.onView("week")}>Week</button>
-          <button onClick={() => toolbar.onView("day")}>Day</button>
-        </span>
-      </div>
-    );
-  };
+  //       <span className="rbc-btn-group">
+  //         {!isMobile && (
+  //           <button onClick={() => toolbar.onView("month")}>Month</button>
+  //         )}
+  //         <button onClick={() => toolbar.onView("week")}>Week</button>
+  //         <button onClick={() => toolbar.onView("day")}>Day</button>
+  //       </span>
+  //     </div>
+  //   );
+  // };
 
   return (
     <>
       <div className="min-h-screen h-[calc(100vh-4rem)] md:h-screen bg-white p-2 md:p-4 rounded-lg shadow-md relative overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-50">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
           </div>
         )}
 
         {/* Legend - Responsive grid for type colors */}
-        <div className="mb-2 md:mb-4 grid grid-cols-2 md:flex md:flex-row gap-2 md:gap-4 p-2">
+        <div className="grid grid-cols-2 gap-2 p-2 mb-2 md:mb-4 md:flex md:flex-row md:gap-4">
           {Object.entries(typeColors).map(([type, color]) => (
             <div
               key={type}
               className="flex items-center gap-2 text-xs md:text-sm"
             >
               <div
-                className="w-3 h-3 md:w-4 md:h-4 rounded-full"
+                className="w-3 h-3 rounded-full md:w-4 md:h-4"
                 style={{ backgroundColor: color }}
               />
               <span>{type}</span>
@@ -387,7 +389,7 @@ export function Calendar() {
             className="responsive-calendar"
             eventPropGetter={eventStyleGetter}
             onSelectSlot={handleSelectSlot}
-            components={{ toolbar: CustomToolbar }}
+            // components={{ toolbar: CustomToolbar }}
           />
         </div>
       </div>
@@ -413,7 +415,7 @@ export function Calendar() {
               onClick={handleConfirmReschedule}
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : null}
               Confirm Update
             </AlertDialogAction>
