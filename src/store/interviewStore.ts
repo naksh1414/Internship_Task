@@ -47,7 +47,12 @@ export const useInterviewStore = create<InterviewStore>()(
 
         // Convert date and time to UTC
         const dateOnly = new Date(updatedInterview.date);
-        dateOnly.setHours(0, 0, 0, 0);
+        if (
+          updatedInterview.changeType === "date" ||
+          updatedInterview.changeType === "both"
+        ) {
+          dateOnly.setHours(0, 0, 0, 0);
+        }
         const utcDate = zonedTimeToUtc(dateOnly, userTimeZone);
 
         const timeOnly = parse(updatedInterview.time, "HH:mm", new Date());
